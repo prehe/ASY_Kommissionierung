@@ -1,106 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <title>Mehrfach-QR-Code Scanner</title>
-  <script src="https://unpkg.com/@zxing/browser@latest"></script>
+  <meta charset="utf-8">
+  <title>QR-Code Scanner</title>
+  <script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
   <style>
-    #video-wrapper {
-      position: relative;
-      width: 640px;
-      margin: auto;
-    }
-    video, canvas {
-      position: absolute;
-      top: 0; left: 0;
+    video {
       width: 100%;
-      height: auto;
-    }
-    #result {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 18px;
+      max-width: 400px;
     }
   </style>
 </head>
 <body>
-  <h1 style="text-align:center;">Live QR-Code Erkennung (Mehrere gleichzeitig)</h1>
-  <div id="video-wrapper">
-    <video id="video" autoplay muted playsinline></video>
-    <canvas id="overlay"></canvas>
-  </div>
+  <h1>QR-Code Scanner</h1>
+  <video id="video" autoplay></video>
   <div id="result">Starte Scanner...</div>
 
   <script>
     const codeReader = new ZXing.BrowserMultiFormatReader();
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('overlay');
-    const context = canvas.getContext('2d');
     const resultBox = document.getElementById('result');
 
     async function startScanner() {
       try {
-        const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-        const selectedDeviceId = devices[0].deviceId;
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        console.log(devices);
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        const selectedDeviceId = videoDevices[0]?.deviceId; // Use the first video input device
 
-        const previewStream = await navigator.mediaDevices.getUserMedia({
-          video: { deviceId: selectedDeviceId }
-        });
-
-        video.srcObject = previewStream;
-
-        video.onloadedmetadata = () => {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          detectLoop();
-        };
-
-        async function detectLoop() {
-          requestAnimationFrame(detectLoop);
-
-          if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
-
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-
-          try {
-            const results = await codeReader.decodeFromImageData(imageData);
-            context.clearRect(0, 0, canvas.width, canvas.height);
-
-            if (Array.isArray(results)) {
-              resultBox.innerText = 'Erkannte QR-Codes: ' + results.map(r => r.text).join(', ');
-
-              results.forEach(result => {
-                const points = result.resultPoints;
-                if (points.length >= 4) {
-                  context.beginPath();
-                  context.moveTo(points[0].x, points[0].y);
-                  for (let i = 1; i < points.length; i++) {
-                    context.lineTo(points[i].x, points[i].y);
-                  }
-                  context.closePath();
-                  context.lineWidth = 3;
-                  context.strokeStyle = 'red';
-                  context.stroke();
-                }
-
-                // Optional: Text anzeigen
-                context.font = "16px Arial";
-                context.fillStyle = "lime";
-                context.fillText(result.text, points[0].x + 5, points[0].y - 10);
-              });
+        if (selectedDeviceId) {
+          codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+            if (result) {
+              resultBox.innerText = 'Erkannter QR-Code: ' + result.getText();
+              codeReader.reset(); // Stop the scanner
+            } else if (err && !(err instanceof ZXing.NotFoundException)) {
+              console.error(err);
             }
-          } catch (err) {
-            // Kein QR-Code gefunden – kein Fehler
-          }
+          });
+        } else {
+          resultBox.innerText = 'Keine Kamera gefunden.';
         }
       } catch (err) {
-        resultBox.innerText = 'Fehler beim Starten der Kamera.';
         console.error(err);
+        resultBox.innerText = 'Fehler beim Starten des Scanners.';
       }
     }
 
-    startScanner();
+    // Start the scanner when the page loads
+    window.addEventListener('load', startScanner);
   </script>
 </body>
 </html>

@@ -36,7 +36,7 @@ def main():
 
             n = len(hull)
             for j in range(0, n):
-                cv2.line(frame, hull[j], hull[(j + 1) % n], (255, 0, 0), 2)
+                cv2.line(frame, hull[j], hull[(j + 1) % n], (0, 0, 255), 2)
 
             # Text anzeigen
             cv2.putText(frame, qr_data, (obj.rect.left, obj.rect.top - 10),
