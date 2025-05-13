@@ -76,5 +76,5 @@ def initialize_listener(inputLanguage="de-DE", inputPrefixSuffix="jarvis", input
     dictionary = inputDictionary
 
 def start_listener():
-    jarvis_thread = threading.Thread(target=listener, daemon=True)
-    jarvis_thread.start()
+    speech_thread = threading.Thread(target=listener, daemon=True)
+    speech_thread.start()
