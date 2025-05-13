@@ -2,7 +2,7 @@ import cv2
 from pyzbar.pyzbar import decode
 import numpy as np
 
-def highlight_product_qrcodes_from_job(cap, product_names:list = None):
+def highlight_product_qrcodes_from_job(cap, product_names: list = None):
     print("QR-Code-Scanner gestartet. Drücke 'q' zum Beenden.")
 
     while True:
@@ -17,7 +17,6 @@ def highlight_product_qrcodes_from_job(cap, product_names:list = None):
             # Daten aus QR-Code extrahieren
             qr_data = obj.data.decode('utf-8')
 
-
             # Rechteck um QR-Code zeichnen, wenn QR-Code-Daten mit product_names übereinstimmen
             if qr_data in product_names:
                 points = obj.polygon
@@ -31,9 +30,9 @@ def highlight_product_qrcodes_from_job(cap, product_names:list = None):
                 for j in range(0, n):
                     cv2.line(frame, hull[j], hull[(j + 1) % n], (0, 0, 255), 2)
 
-            # Text anzeigen
-            cv2.putText(frame, qr_data, (obj.rect.left, obj.rect.top - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                # Text anzeigen (nur für gültige QR-Codes)
+                cv2.putText(frame, qr_data, (obj.rect.left, obj.rect.top - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         # Bild anzeigen
         cv2.imshow('QR-Code Scanner', frame)
@@ -41,7 +40,7 @@ def highlight_product_qrcodes_from_job(cap, product_names:list = None):
         # Beenden mit Taste 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        
+
 def scan_new_job(cap):
     while True:
         success, frame = cap.read()
@@ -54,7 +53,7 @@ def scan_new_job(cap):
         for obj in decoded_objects:
             # Daten aus QR-Code extrahieren
             qr_data = obj.data.decode('utf-8')
-            return qr_data
+            return str(qr_data) 
 
         # Bild anzeigen
         cv2.imshow('QR-Code Scanner', frame)
@@ -62,26 +61,3 @@ def scan_new_job(cap):
         # Beenden mit Taste 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        
-def close_window(cap):
-    cap.release()
-    cv2.destroyAllWindows()
-
-def main():
-    # Kameraauswahl: 0 = Frontkamera, 1 = Rückkamera (je nach Gerät anpassen)
-    cap = cv2.VideoCapture(0)
-
-    if not cap.isOpened():
-        print(f"Kamera 0 konnte nicht geöffnet werden.")
-        return
-
-    # job_id = scan_new_job(cap)
-    # print(f"Neuer Job-ID: {job_id}")
-    # Warte auf QR-Code-Scan für den Job
-    highlight_product_qrcodes_from_job(cap, product_names=["https://de.wikipedia.org", "https://softmatic.com"])
-
-    close_window(cap)
-
-
-if __name__ == "__main__":
-    main()
