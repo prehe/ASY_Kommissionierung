@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>QR-Live-Scanner</title>
+  <style>
+    #output {
+      width: 640px;
+      border: 2px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>QR-Code Livestream</h1>
+  <video id="video" width="640" autoplay playsinline muted></video>
+  <canvas id="canvas" style="display: none;"></canvas>
+  <img id="output" />
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const output = document.getElementById('output');
+
+    // Zugriff auf die hintere Kamera (falls verfügbar)
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { exact: "environment" } // "environment" für die hintere Kamera
+      }
+    }).then(stream => {
+      video.srcObject = stream;
+    }).catch(error => {
+      console.error("Fehler beim Zugriff auf die Kamera:", error);
+    });
+
+    async function sendFrame() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+
+      const dataUrl = canvas.toDataURL('image/jpeg');
+
+      const response = await fetch('/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl })
+      });
+
+      const result = await response.json();
+      if (result.image) {
+        output.src = result.image;
+      }
+
+      // Wiederholen
+      setTimeout(sendFrame, 1000 / 60); // 60 FPS
+    }
+
+    video.onloadeddata = () => {
+      sendFrame();
+    };
+  </script>
+</body>
+</html>
