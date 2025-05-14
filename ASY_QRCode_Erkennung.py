@@ -4,7 +4,7 @@ import numpy as np
 
 def highlight_product_qrcodes_from_job(cap, product_names: list = None):
     print("QR-Code-Scanner gestartet. Drücke 'q' zum Beenden.")
-
+    
     while True:
         success, frame = cap.read()
         if not success:
@@ -46,7 +46,7 @@ def scan_new_job(cap):
         success, frame = cap.read()
         if not success:
             break
-
+        
         # Nur QR-Codes erkennen (kein PDF417, keine Barcodes)
         decoded_objects = [obj for obj in decode(frame) if obj.type == 'QRCODE']
 

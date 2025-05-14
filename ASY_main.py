@@ -16,11 +16,16 @@ def close_window(cap):
 def main():
     # Kameraauswahl: 0 = Frontkamera, 1 = Rückkamera (je nach Gerät anpassen)
     cap = init_camera()
+    
+    job_products = {
+        "124343433": ["Platine 234", "Platine 376"],
+        "192343324": ["Platine 123"]
+    }
 
     job_id = scan_new_job(cap)
     print(f"Neuer Job-ID: {job_id}")
     # Warte auf QR-Code-Scan für den Job
-    highlight_product_qrcodes_from_job(cap, product_names=["https://de.wikipedia.org", "https://softmatic.com"])
+    highlight_product_qrcodes_from_job(cap, product_names=job_products[job_id])
 
     close_window(cap)
 

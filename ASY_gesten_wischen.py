@@ -93,7 +93,7 @@ while cap.isOpened():
             thumb_index_distance = distance(thumb_px, index_px)
 
             # Daumen an Zeigefinger erkennen
-            if thumb_index_distance < 30:
+            if thumb_index_distance < 20:
                 center_x = (thumb_px[0] + index_px[0]) // 2
                 center_y = (thumb_px[1] + index_px[1]) // 2
                 gesture_circle_points.append((center_x, center_y))
@@ -108,11 +108,7 @@ while cap.isOpened():
 
                         if -45 <= angle <= 45:
                             last_gesture = "Swipe Right"
-                        elif 45 < angle <= 135:
-                            last_gesture = "Swipe Up"
-                        elif -135 <= angle < -45:
-                            last_gesture = "Swipe Down"
-                        else:
+                        elif 45 < angle < 135:
                             last_gesture = "Swipe Left"
                         
                 prev_x, prev_y = index_px[0], index_px[1]
