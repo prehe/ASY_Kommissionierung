@@ -1,5 +1,5 @@
-from SpeechToText import initialize_listener, start_listener, on_command
-from TextToSpeech import text_to_speech
+from LanguageAssistant.SpeechToText import initialize_listener, start_listener, on_command
+from LanguageAssistant.TextToSpeech import text_to_speech
 
 def handle_command(command):
     if command == "activate":
