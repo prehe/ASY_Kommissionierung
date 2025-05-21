@@ -78,3 +78,4 @@ def initialize_listener(inputLanguage="de-DE", inputPrefixSuffix="jarvis", input
 def start_listener():
     speech_thread = threading.Thread(target=listener, daemon=True)
     speech_thread.start()
+    return speech_thread

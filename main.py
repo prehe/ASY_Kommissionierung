@@ -1,4 +1,5 @@
-from main_init import initialize_voice_assistant, initialize_gui
+from LanguageAssistant.SpeechToText import initialize_listener, start_listener, on_command
+from LanguageAssistant.LanguageHandler import handle_command
 
 state = "initial"
 state_changed = True  # Start mit True, damit der State beim ersten Mal ausgegeben wird
@@ -10,7 +11,24 @@ def main():
     global state, state_changed, active_job, current_step
 
     # initialize_gui()
-    # initialize_voice_assistant()
+    # init language assistant
+    dictionary = {
+    "activate": ["hey jarvis", "start jarvis"],
+    "deactivate": ["jarvis stop", "stop jarvis"],
+    "next": ["weiter"],
+    "back": ["zurück"],
+    "exit": ["beenden"],
+}
+
+    # Sprachassistent im Hintergrund starten (nicht blockierend)
+    on_command(handle_command)
+    initialize_listener(
+        inputLanguage="de-DE",
+        inputPrefixSuffix="jarvis",
+        inputFixCommands=["activate", "deactivate"],
+        inputDictionary=dictionary
+    )
+    speech_thread = start_listener()
 
     # Main loop to handle state transitions
     while True:
